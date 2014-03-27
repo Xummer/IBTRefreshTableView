@@ -19,6 +19,10 @@
 		C1784B0418E418D7000DA1BE /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1784AEC18E418D6000DA1BE /* UIKit.framework */; };
 		C1784B0C18E418D7000DA1BE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1784B0A18E418D7000DA1BE /* InfoPlist.strings */; };
 		C1784B0E18E418D7000DA1BE /* TableViewRefreshTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C1784B0D18E418D7000DA1BE /* TableViewRefreshTests.m */; };
+		C1784B1D18E41943000DA1BE /* IBTTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = C1784B1C18E41943000DA1BE /* IBTTableView.m */; };
+		C1784B2118E41A65000DA1BE /* IBTScrollLoadMoreView.m in Sources */ = {isa = PBXBuildFile; fileRef = C1784B2018E41A65000DA1BE /* IBTScrollLoadMoreView.m */; };
+		C1784B2518E41B7C000DA1BE /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1784B2318E41B7C000DA1BE /* ViewController.m */; };
+		C1784B2618E41B7C000DA1BE /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = C1784B2418E41B7C000DA1BE /* ViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +52,14 @@
 		C1784B0918E418D7000DA1BE /* TableViewRefreshTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TableViewRefreshTests-Info.plist"; sourceTree = "<group>"; };
 		C1784B0B18E418D7000DA1BE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1784B0D18E418D7000DA1BE /* TableViewRefreshTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TableViewRefreshTests.m; sourceTree = "<group>"; };
+		C1784B1B18E41943000DA1BE /* IBTTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IBTTableView.h; sourceTree = "<group>"; };
+		C1784B1C18E41943000DA1BE /* IBTTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IBTTableView.m; sourceTree = "<group>"; };
+		C1784B1E18E419D7000DA1BE /* IBTScrollViewRefreshDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IBTScrollViewRefreshDelegate.h; sourceTree = "<group>"; };
+		C1784B1F18E41A64000DA1BE /* IBTScrollLoadMoreView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IBTScrollLoadMoreView.h; sourceTree = "<group>"; };
+		C1784B2018E41A65000DA1BE /* IBTScrollLoadMoreView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IBTScrollLoadMoreView.m; sourceTree = "<group>"; };
+		C1784B2218E41B7C000DA1BE /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		C1784B2318E41B7C000DA1BE /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		C1784B2418E41B7C000DA1BE /* ViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +121,10 @@
 			children = (
 				C1784AF718E418D6000DA1BE /* AppDelegate.h */,
 				C1784AF818E418D6000DA1BE /* AppDelegate.m */,
+				C1784B2218E41B7C000DA1BE /* ViewController.h */,
+				C1784B2318E41B7C000DA1BE /* ViewController.m */,
+				C1784B2418E41B7C000DA1BE /* ViewController.xib */,
+				C1784B1A18E41933000DA1BE /* IBTTableView */,
 				C1784AFA18E418D6000DA1BE /* Images.xcassets */,
 				C1784AEF18E418D6000DA1BE /* Supporting Files */,
 			);
@@ -142,6 +158,18 @@
 				C1784B0A18E418D7000DA1BE /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		C1784B1A18E41933000DA1BE /* IBTTableView */ = {
+			isa = PBXGroup;
+			children = (
+				C1784B1B18E41943000DA1BE /* IBTTableView.h */,
+				C1784B1C18E41943000DA1BE /* IBTTableView.m */,
+				C1784B1E18E419D7000DA1BE /* IBTScrollViewRefreshDelegate.h */,
+				C1784B1F18E41A64000DA1BE /* IBTScrollLoadMoreView.h */,
+				C1784B2018E41A65000DA1BE /* IBTScrollLoadMoreView.m */,
+			);
+			path = IBTTableView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -220,6 +248,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C1784AF318E418D6000DA1BE /* InfoPlist.strings in Resources */,
+				C1784B2618E41B7C000DA1BE /* ViewController.xib in Resources */,
 				C1784AFB18E418D6000DA1BE /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -239,8 +268,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1784B1D18E41943000DA1BE /* IBTTableView.m in Sources */,
 				C1784AF918E418D6000DA1BE /* AppDelegate.m in Sources */,
+				C1784B2118E41A65000DA1BE /* IBTScrollLoadMoreView.m in Sources */,
 				C1784AF518E418D6000DA1BE /* main.m in Sources */,
+				C1784B2518E41B7C000DA1BE /* ViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "ViewController.h"
 
 @implementation AppDelegate
 
@@ -15,7 +16,12 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
+    
+    ViewController *VC = [[ViewController alloc] init];
+    self.window.rootViewController = VC;
+    
     [self.window makeKeyAndVisible];
+    
     return YES;
 }
 
