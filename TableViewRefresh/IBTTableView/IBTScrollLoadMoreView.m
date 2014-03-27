@@ -59,9 +59,10 @@
 
 - (void)setupDefualtText {
     self.loadMoreText = @"Load more";
+    self.dragToLoadText = @"Pull up to load more";
     self.loadingText = @"Loading...";
-    self.finishedText = @""; //@"Load finish";
-    self.failedText = @""; //@"Load failed";
+    self.finishedText = @"Load finish";
+    self.failedText = @"Load failed";
     self.noMoreText = @"No more";
 }
 
@@ -72,8 +73,11 @@
     NSString *textStr;
     BOOL needAnimate = NO;
     switch (state) {
-        case kLoadStateDraging:
+        case kLoadStateNormal:
             textStr = _loadMoreText;
+            break;
+        case kLoadStateDraging:
+            textStr = _dragToLoadText;
             break;
         case kLoadStateLoading:
             needAnimate = YES;

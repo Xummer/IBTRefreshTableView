@@ -10,7 +10,7 @@
 
 @interface IBTTableView ()
 
-
+@property (strong, nonatomic) UIView *refreshFooterView;
 
 @end
 
@@ -28,30 +28,41 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        // Initialization code
-        //        [self registerForFooterKVO];
+//        [self registerForFooterKVO];
         
     }
     return self;
 }
 
-//- (void)awakeFromNib {
-//    [super awakeFromNib];
+- (void)awakeFromNib {
+    [super awakeFromNib];
 //    [self registerForFooterKVO];
-//}
-//
-//- (void)dealloc {
-//    [self unregisterFromFooterKVO];
-//}
+}
 
-//- (void)setRefreshFooterView:(UIView *)refreshFooterView {
-//
-//    if (_refreshFooterView != refreshFooterView) {
-//        [_refreshFooterView removeFromSuperview];
-//        _refreshFooterView = refreshFooterView;
-//    }
-//
-//}
+- (void)dealloc {
+//    [self unregisterFromFooterKVO];
+}
+
+- (void)setRefreshFooterView:(UIView *)refreshFooterView {
+
+    if (_refreshFooterView != refreshFooterView) {
+        [_refreshFooterView removeFromSuperview];
+        _refreshFooterView = refreshFooterView;
+        [self addSubview:refreshFooterView];
+        
+        [self setNeedsLayout];
+    }
+}
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    
+    if (_refreshFooterView) {
+        CGRect frame = _refreshFooterView.frame;
+        frame.origin.y = self.contentSize.height;
+        _refreshFooterView.frame = frame;
+    }
+}
 
 - (void)didMoveToSuperview {
     [super didMoveToSuperview];
@@ -69,10 +80,10 @@
     UIEdgeInsets inset = self.contentInset;
     if (size.height < bounds.size.height - inset.bottom ||
         [self.dataSource tableView:self numberOfRowsInSection:0] == 0) {
-        self.tableFooterView = nil;
+        self.refreshFooterView = nil;
     }
     else {
-        self.tableFooterView = _loadMoreView;
+        self.refreshFooterView = _loadMoreView;
     }
 }
 
@@ -193,13 +204,13 @@
         _loadMoreView.loadMoreText = text;
     }
     
-    self.tableFooterView = _loadMoreView;
-    [_loadMoreView updateState:kLoadStateDefault];
+    self.refreshFooterView = _loadMoreView;
+    [_loadMoreView updateState:kLoadStateNormal];
 }
 
 - (void)removeLoadMoreFoot {
-    if (self.tableFooterView == _loadMoreView) {
-        self.tableFooterView = nil;
+    if (self.refreshFooterView == _loadMoreView) {
+        self.refreshFooterView = nil;
     }
 }
 
@@ -218,94 +229,137 @@
 }
 
 - (void)endLoadMoreWithState:(LoadMoreState)state {
-    if (self.tableFooterView) {
+    if (self.refreshFooterView) {
         [_loadMoreView updateState:state];
+        
+        if ([_refreshDelegate respondsToSelector:@selector(endLoadMoreData:)]) {
+            [_refreshDelegate endLoadMoreData:self];
+        }
+        
+        [UIView animateWithDuration:.2f animations:^{
+            self.contentInset = UIEdgeInsetsZero;
+        }];
     }
 }
 
 - (void)resetLoadMoreFoot {
-    if (self.tableFooterView) {
-        [_loadMoreView updateState:kLoadStateDefault];
-    }
+    [self endLoadMoreWithState:kLoadStateNormal];
 }
 
 - (void)endLoadWithFailed {
-    if (self.tableFooterView) {
-        [_loadMoreView updateState:kLoadStateFailed];
-    }
+    [self endLoadMoreWithState:kLoadStateFailed];
 }
 
 - (void)tableViewDidScroll:(UIScrollView *)scrollView {
-    if (self.tableFooterView) {
+    
+    if (!_refreshFooterView) {
+        return;
+    }
+    if (_loadMoreView.currentState == kLoadStateLoading) {
+        CGFloat offsetH = CGRectGetHeight(_loadMoreView.frame);
+        scrollView.contentInset = UIEdgeInsetsMake(0, 0, offsetH, 0);
+    }
+    else if (scrollView.isDragging) {
         
-        CGPoint offset = self.contentOffset;
-        CGRect bounds = self.bounds;
-        CGSize size = self.contentSize;
-        UIEdgeInsets inset = self.contentInset;
-        float y = offset.y + bounds.size.height - inset.bottom;
-        float h = size.height;
-        // NSLog(@"offset: %f", offset.y);
-        // NSLog(@"content.height: %f", size.height);
-        // NSLog(@"bounds.height: %f", bounds.size.height);
-        // NSLog(@"inset.top: %f", inset.top);
-        // NSLog(@"inset.bottom: %f", inset.bottom);
-        // NSLog(@"pos: %f of %f", y, h);
+        BOOL _loading = NO;
+		if ([_refreshDelegate respondsToSelector:@selector(isFooterLoading)]) {
+			_loading = [_refreshDelegate isFooterLoading];
+		}
         
-        float reload_distance = CGRectGetHeight(self.tableFooterView.frame);
-        if(y > h - reload_distance) {
-            [self startLoadMore];
-            //            NSLog(@"load more rows");
+        CGFloat maxOffsetY = scrollView.contentSize.height - CGRectGetHeight(scrollView.frame);
+        
+        NSLog(@" %f - %f", scrollView.contentOffset.y, maxOffsetY );
+        
+        if (_loadMoreView.currentState == kLoadStateDraging &&
+            scrollView.contentOffset.y > maxOffsetY &&
+            scrollView.contentOffset.y < maxOffsetY + CGRectGetHeight(_loadMoreView.frame) &&
+            !_loading)
+        {
+			[_loadMoreView updateState:kLoadStateNormal];
+		}
+        else if ((_loadMoreView.currentState == kLoadStateNormal ||
+                 _loadMoreView.currentState >= kLoadStateFinished) &&
+                 scrollView.contentOffset.y > maxOffsetY + CGRectGetHeight(_loadMoreView.frame) &&
+                 !_loading)
+        {
+			[_loadMoreView updateState:kLoadStateDraging];
+		}
+        
+        if (scrollView.contentInset.bottom != 0) {
+			scrollView.contentInset = UIEdgeInsetsZero;
+		}
+    }
+}
+
+- (void)tableviewDidEndDragging:(UIScrollView *)scrollView {
+    BOOL _loading = NO;
+	if ([_refreshDelegate respondsToSelector:@selector(isFooterLoading)]) {
+        _loading = [_refreshDelegate isFooterLoading];
+    }
+	
+    CGFloat maxOffsetY = scrollView.contentSize.height - CGRectGetHeight(scrollView.frame);
+	if (scrollView.contentOffset.y >= maxOffsetY + CGRectGetHeight(_loadMoreView.frame) &&
+        !_loading) {
+		
+		if ([_refreshDelegate respondsToSelector:@selector(startLoadMoreData:)]) {
+            [_refreshDelegate startLoadMoreData:self];
+        }
+		
+		[_loadMoreView updateState:kLoadStateLoading];
+        
+        [UIView animateWithDuration:.2f animations:^{
+            scrollView.contentInset = UIEdgeInsetsMake(0, 0, CGRectGetHeight(_loadMoreView.frame), 0);
+        }];
+	}
+}
+
+- (void)resetFooterView {
+    if (_refreshFooterView) {
+        CGFloat contentHeight = self.contentSize.height;
+        CGRect frame = _refreshFooterView.frame;
+        frame.origin = (CGPoint){
+            .x = (CGRectGetWidth(self.frame) - CGRectGetWidth(frame)) * .5f,
+            .y = contentHeight,
+        };
+        _refreshFooterView.frame = frame;
+
+        if (_refreshFooterView.superview != self) {
+            [self addSubview:_refreshFooterView];
         }
     }
 }
 
-//- (void)resetFooterView {
-//    if (_refreshFooterView) {
-//        CGFloat contentHeight = self.contentSize.height;
-//        CGRect frame = _refreshFooterView.frame;
-//        frame.origin = (CGPoint){
-//            .x = (CGRectGetWidth(self.frame) - CGRectGetWidth(frame)) * .5f,
-//            .y = contentHeight,
-//        };
-//        _refreshFooterView.frame = frame;
-//
-//        if (_refreshFooterView.superview != self) {
-//            [self addSubview:_refreshFooterView];
-//        }
-//    }
-//}
+#pragma mark - KVO
+- (void)registerForFooterKVO {
+    for (NSString *keyPath in [self observableKeypathsOfHeadView]) {
+		[self addObserver:self
+               forKeyPath:keyPath
+                  options:NSKeyValueObservingOptionNew
+                  context:NULL];
+	}
+}
 
-//#pragma mark - KVO
-//- (void)registerForFooterKVO {
-//    for (NSString *keyPath in [self observableKeypathsOfHeadView]) {
-//		[self addObserver:self
-//               forKeyPath:keyPath
-//                  options:NSKeyValueObservingOptionNew
-//                  context:NULL];
-//	}
-//}
-//
-//- (void)unregisterFromFooterKVO {
-//    for (NSString *keyPath in [self observableKeypathsOfHeadView]) {
-//		[self removeObserver:self forKeyPath:keyPath];
-//	}
-//}
-//
-//- (NSArray *)observableKeypathsOfHeadView {
-//    return @[ @"contentSize" ];
-//}
-//
-//- (void)observeValueForKeyPath:(NSString *)keyPath
-//                      ofObject:(id)object
-//                        change:(NSDictionary *)change
-//                       context:(void *)context
-//{
-//    
-//    if ([keyPath isEqualToString:@"contentSize"]) {
-//        [self resetFooterView];
-//    }
-//    
-//}
+- (void)unregisterFromFooterKVO {
+    for (NSString *keyPath in [self observableKeypathsOfHeadView]) {
+		[self removeObserver:self forKeyPath:keyPath];
+	}
+}
+
+- (NSArray *)observableKeypathsOfHeadView {
+    return @[ @"contentSize" ];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context
+{
+    
+    if ([keyPath isEqualToString:@"contentSize"]) {
+        [self resetFooterView];
+    }
+    
+}
 
 
 @end

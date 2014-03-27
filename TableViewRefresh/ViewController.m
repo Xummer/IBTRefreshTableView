@@ -17,6 +17,10 @@ static NSString *cellID = @"CellReuseIdentifier";
     UITableViewDelegate,
     IBTScrollViewRefreshDelegate
 >
+{
+    NSInteger _arrcount;
+    BOOL _reloading;
+}
 
 @property (weak, nonatomic) IBOutlet IBTTableView *tableView;
 @property (strong, nonatomic) NSArray *dataArray;
@@ -39,9 +43,16 @@ static NSString *cellID = @"CellReuseIdentifier";
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     
-    self.dataArray = [self arrayWithCount:20];
+    _arrcount = 26
+    self.dataArray = [self arrayWithCount:_arrcount];
     
     [self setupSubviews];
+}
+
+- (void)viewWillLayoutSubviews {
+    [super viewWillLayoutSubviews];
+    
+    _tableView.frame = self.view.bounds;
 }
 
 - (void)didReceiveMemoryWarning
@@ -93,7 +104,8 @@ static NSString *cellID = @"CellReuseIdentifier";
     [tableView dequeueReusableCellWithIdentifier:cellID
                                     forIndexPath:indexPath];
     
-    cell.textLabel.text = [NSString stringWithFormat:@"%@", [NSDate date]];
+    cell.textLabel.textAlignment = NSTextAlignmentCenter;
+    cell.textLabel.text = _dataArray[indexPath.row];
     
     return cell;
 }
@@ -102,13 +114,23 @@ static NSString *cellID = @"CellReuseIdentifier";
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     if (scrollView == _tableView) {
-        [_tableView tableViewDidReachFootView];
+        [_tableView tableViewDidScroll:scrollView];
     }
 }
 
-#pragma mark - TableViewRefreshDelegate
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+    
+    if (scrollView == _tableView) {
+        [_tableView tableviewDidEndDragging:scrollView];
+    }
+}
+
+#pragma mark - IBTScrollViewRefreshDelegate
 
 -(void)startRefreshData:(UIScrollView *)scrollView {
+    _arrcount = 26;
+    self.dataArray = [self arrayWithCount:_arrcount];
+    [_tableView reloadData];
     [self performSelector:@selector(endRefresh) withObject:nil afterDelay:1];
 }
 
@@ -117,11 +139,19 @@ static NSString *cellID = @"CellReuseIdentifier";
 }
 
 -(void)startLoadMoreData:(UIScrollView *)scrollView {
+    _reloading = YES;
+    _arrcount += 10;
+    self.dataArray = [self arrayWithCount:_arrcount];
+    [_tableView reloadData];
     [self performSelector:@selector(endLoadMore) withObject:nil afterDelay:1];
 }
 
 -(void)endLoadMoreData:(UIScrollView *)scrollView {
-    
+    _reloading = NO;
+}
+
+- (BOOL)isFooterLoading {
+    return _reloading;
 }
 
 

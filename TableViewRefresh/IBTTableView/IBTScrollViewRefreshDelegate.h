@@ -18,11 +18,12 @@ typedef NS_ENUM(NSUInteger, RefreshState) {
 
 @optional
 // Top refresh
--(void)startRefreshData:(UIScrollView *)scrollView;
--(void)endRefreshData:(UIScrollView *)scrollView;
+- (void)startRefreshData:(UIScrollView *)scrollView;
+- (void)endRefreshData:(UIScrollView *)scrollView;
 
 // Bottom loadMore
--(void)startLoadMoreData:(UIScrollView *)scrollView;
--(void)endLoadMoreData:(UIScrollView *)scrollView;
+- (void)startLoadMoreData:(UIScrollView *)scrollView;
+- (void)endLoadMoreData:(UIScrollView *)scrollView;
+- (BOOL)isFooterLoading;
 
 @end

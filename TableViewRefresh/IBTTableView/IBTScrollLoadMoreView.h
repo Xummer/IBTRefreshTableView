@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 
 typedef NS_ENUM(NSUInteger, LoadMoreState) {
+    kLoadStateNormal = 1,
     kLoadStateDraging,
     kLoadStateLoading,
     kLoadStateFinished,
@@ -21,6 +22,7 @@ typedef NS_ENUM(NSUInteger, LoadMoreState) {
 @property (nonatomic, assign, readonly) LoadMoreState currentState;
 @property (nonatomic, strong) UIColor *textColor;
 @property (nonatomic, strong) NSString *loadMoreText;
+@property (nonatomic, strong) NSString *dragToLoadText;
 @property (nonatomic, strong) NSString *loadingText;
 @property (nonatomic, strong) NSString *finishedText;
 @property (nonatomic, strong) NSString *failedText;
