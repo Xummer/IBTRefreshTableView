@@ -19,7 +19,6 @@ static NSString *cellID = @"CellReuseIdentifier";
 >
 {
     NSInteger _arrcount;
-    BOOL _reloading;
 }
 
 @property (weak, nonatomic) IBOutlet IBTTableView *tableView;
@@ -43,7 +42,7 @@ static NSString *cellID = @"CellReuseIdentifier";
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     
-    _arrcount = 26
+    _arrcount = 26;
     self.dataArray = [self arrayWithCount:_arrcount];
     
     [self setupSubviews];
@@ -139,7 +138,6 @@ static NSString *cellID = @"CellReuseIdentifier";
 }
 
 -(void)startLoadMoreData:(UIScrollView *)scrollView {
-    _reloading = YES;
     _arrcount += 10;
     self.dataArray = [self arrayWithCount:_arrcount];
     [_tableView reloadData];
@@ -147,11 +145,7 @@ static NSString *cellID = @"CellReuseIdentifier";
 }
 
 -(void)endLoadMoreData:(UIScrollView *)scrollView {
-    _reloading = NO;
-}
 
-- (BOOL)isFooterLoading {
-    return _reloading;
 }
 
 

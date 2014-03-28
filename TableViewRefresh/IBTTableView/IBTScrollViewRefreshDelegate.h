@@ -24,6 +24,5 @@ typedef NS_ENUM(NSUInteger, RefreshState) {
 // Bottom loadMore
 - (void)startLoadMoreData:(UIScrollView *)scrollView;
 - (void)endLoadMoreData:(UIScrollView *)scrollView;
-- (BOOL)isFooterLoading;
 
 @end

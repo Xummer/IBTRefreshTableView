@@ -25,7 +25,6 @@
 
 - (void)addLoadMoreFootWithText:(NSString *)text;
 - (void)removeLoadMoreFoot;
-- (void)startLoadMore;
 - (void)endLoadMoreWithState:(LoadMoreState)state;
 - (void)resetLoadMoreFoot;
 

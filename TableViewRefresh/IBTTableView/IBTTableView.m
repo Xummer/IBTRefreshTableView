@@ -10,6 +10,10 @@
 
 @interface IBTTableView ()
 
+{
+    BOOL _loading;
+}
+
 @property (strong, nonatomic) UIView *refreshFooterView;
 
 @end
@@ -19,7 +23,7 @@
 - (id)initWithFrame:(CGRect)frame style:(UITableViewStyle)style {
     self = [super initWithFrame:frame style:style];
     if (self) {
-        //        [self registerForFooterKVO];
+        
     }
     return self;
 }
@@ -28,7 +32,6 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-//        [self registerForFooterKVO];
         
     }
     return self;
@@ -36,11 +39,10 @@
 
 - (void)awakeFromNib {
     [super awakeFromNib];
-//    [self registerForFooterKVO];
 }
 
 - (void)dealloc {
-//    [self unregisterFromFooterKVO];
+
 }
 
 - (void)setRefreshFooterView:(UIView *)refreshFooterView {
@@ -153,8 +155,6 @@
         // Do networking in |startRefreshData:|
         [_refreshDelegate startRefreshData:self];
     }
-    
-    //    [self performSelector:@selector(endRefresh:) withObject:refreshControl afterDelay:1.0f];
 }
 
 - (void)endRefresh:(id)sender {
@@ -214,23 +214,11 @@
     }
 }
 
-- (void)startLoadMore {
-    if (_loadMoreView.currentState != kLoadStateLoading &&
-        _loadMoreView.currentState != kLoadStateNoMore)
-    {
-        if ([_refreshDelegate respondsToSelector:@selector(startLoadMoreData:)]) {
-            [_refreshDelegate startLoadMoreData:self];
-        }
-        //        [self performSelector:@selector(endLoadWithFailed)
-        //                   withObject:nil
-        //                   afterDelay:1];
-        [_loadMoreView updateState:kLoadStateLoading];
-    }
-}
-
 - (void)endLoadMoreWithState:(LoadMoreState)state {
     if (self.refreshFooterView) {
         [_loadMoreView updateState:state];
+        
+        _loading = NO;
         
         if ([_refreshDelegate respondsToSelector:@selector(endLoadMoreData:)]) {
             [_refreshDelegate endLoadMoreData:self];
@@ -261,14 +249,9 @@
     }
     else if (scrollView.isDragging) {
         
-        BOOL _loading = NO;
-		if ([_refreshDelegate respondsToSelector:@selector(isFooterLoading)]) {
-			_loading = [_refreshDelegate isFooterLoading];
-		}
-        
         CGFloat maxOffsetY = scrollView.contentSize.height - CGRectGetHeight(scrollView.frame);
         
-        NSLog(@" %f - %f", scrollView.contentOffset.y, maxOffsetY );
+//        NSLog(@" %f - %f", scrollView.contentOffset.y, maxOffsetY );
         
         if (_loadMoreView.currentState == kLoadStateDraging &&
             scrollView.contentOffset.y > maxOffsetY &&
@@ -292,15 +275,12 @@
 }
 
 - (void)tableviewDidEndDragging:(UIScrollView *)scrollView {
-    BOOL _loading = NO;
-	if ([_refreshDelegate respondsToSelector:@selector(isFooterLoading)]) {
-        _loading = [_refreshDelegate isFooterLoading];
-    }
 	
     CGFloat maxOffsetY = scrollView.contentSize.height - CGRectGetHeight(scrollView.frame);
 	if (scrollView.contentOffset.y >= maxOffsetY + CGRectGetHeight(_loadMoreView.frame) &&
         !_loading) {
 		
+        _loading = YES;
 		if ([_refreshDelegate respondsToSelector:@selector(startLoadMoreData:)]) {
             [_refreshDelegate startLoadMoreData:self];
         }
@@ -312,54 +292,5 @@
         }];
 	}
 }
-
-- (void)resetFooterView {
-    if (_refreshFooterView) {
-        CGFloat contentHeight = self.contentSize.height;
-        CGRect frame = _refreshFooterView.frame;
-        frame.origin = (CGPoint){
-            .x = (CGRectGetWidth(self.frame) - CGRectGetWidth(frame)) * .5f,
-            .y = contentHeight,
-        };
-        _refreshFooterView.frame = frame;
-
-        if (_refreshFooterView.superview != self) {
-            [self addSubview:_refreshFooterView];
-        }
-    }
-}
-
-#pragma mark - KVO
-- (void)registerForFooterKVO {
-    for (NSString *keyPath in [self observableKeypathsOfHeadView]) {
-		[self addObserver:self
-               forKeyPath:keyPath
-                  options:NSKeyValueObservingOptionNew
-                  context:NULL];
-	}
-}
-
-- (void)unregisterFromFooterKVO {
-    for (NSString *keyPath in [self observableKeypathsOfHeadView]) {
-		[self removeObserver:self forKeyPath:keyPath];
-	}
-}
-
-- (NSArray *)observableKeypathsOfHeadView {
-    return @[ @"contentSize" ];
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath
-                      ofObject:(id)object
-                        change:(NSDictionary *)change
-                       context:(void *)context
-{
-    
-    if ([keyPath isEqualToString:@"contentSize"]) {
-        [self resetFooterView];
-    }
-    
-}
-
 
 @end
