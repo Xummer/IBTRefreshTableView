@@ -15,7 +15,7 @@
 }
 
 @property (strong, nonatomic) UIView *refreshFooterView;
-
+@property (assign) BOOL footerAnimating;
 @end
 
 @implementation IBTTableView
@@ -224,9 +224,7 @@
             [_refreshDelegate endLoadMoreData:self];
         }
         
-        [UIView animateWithDuration:.2f animations:^{
-            self.contentInset = UIEdgeInsetsZero;
-        }];
+        [self hideLoadMoreView];
     }
 }
 
@@ -237,6 +235,50 @@
 - (void)endLoadWithFailed {
     [self endLoadMoreWithState:kLoadStateFailed];
 }
+
+- (void)hideLoadMoreView {
+    
+    if (UIEdgeInsetsEqualToEdgeInsets(self.contentInset, UIEdgeInsetsZero)) {
+        return;
+    }
+    
+    if (_footerAnimating) {
+        [self performSelector:@selector(hideLoadMoreView) withObject:nil afterDelay:.2f];
+        return;
+    }
+    
+    _footerAnimating = YES;
+    [UIView animateWithDuration:.2f
+                     animations:^{
+                         self.contentInset = UIEdgeInsetsZero;
+                     }
+                     completion:^(BOOL finished) {
+                         _footerAnimating = NO;
+                     }];
+}
+
+- (void)showLoadMoreView {
+    
+    UIEdgeInsets insets = UIEdgeInsetsMake(0, 0, CGRectGetHeight(_loadMoreView.frame), 0);
+    if (UIEdgeInsetsEqualToEdgeInsets(self.contentInset, insets)) {
+        return;
+    }
+    
+    if (_footerAnimating) {
+        [self performSelector:@selector(showLoadMoreView) withObject:nil afterDelay:.2f];
+        return;
+    }
+    
+    _footerAnimating = YES;
+    [UIView animateWithDuration:.2f
+                     animations:^{
+                         self.contentInset = insets;
+                     }
+                     completion:^(BOOL finished) {
+                         _footerAnimating = NO;
+                     }];
+}
+
 
 - (void)tableViewDidScroll:(UIScrollView *)scrollView {
     
@@ -281,15 +323,13 @@
         !_loading) {
 		
         _loading = YES;
+        [_loadMoreView updateState:kLoadStateLoading];
+        
+        [self showLoadMoreView];
+        
 		if ([_refreshDelegate respondsToSelector:@selector(startLoadMoreData:)]) {
             [_refreshDelegate startLoadMoreData:self];
         }
-		
-		[_loadMoreView updateState:kLoadStateLoading];
-        
-        [UIView animateWithDuration:.2f animations:^{
-            scrollView.contentInset = UIEdgeInsetsMake(0, 0, CGRectGetHeight(_loadMoreView.frame), 0);
-        }];
 	}
 }
 

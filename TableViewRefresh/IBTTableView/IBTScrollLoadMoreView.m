@@ -61,7 +61,7 @@
     self.loadMoreText = @"Load more";
     self.dragToLoadText = @"Pull up to load more";
     self.loadingText = @"Loading...";
-    self.finishedText = @"Load finish";
+    self.finishedText = @"Load finished";
     self.failedText = @"Load failed";
     self.noMoreText = @"No more";
 }
