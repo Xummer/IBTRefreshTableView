@@ -66,8 +66,19 @@
     }
 }
 
-- (void)didMoveToSuperview {
-    [super didMoveToSuperview];
+- (void)didMoveToWindow {
+    [super didMoveToWindow];
+    
+    if (!self.window) {
+        if (_refreshControl) {
+            [_refreshControl endRefreshing];
+        }
+        
+        if (_refreshFooterView) {
+            [_loadMoreView updateState:kLoadStateNormal];
+        }
+    }
+    
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -90,15 +101,7 @@
 }
 
 - (void)scrollToTopAnimated:(BOOL)animated {
-    if ([super numberOfSections] > 0) {
-        if ([super numberOfRowsInSection:0] > 0) {
-            NSIndexPath *indexP = [NSIndexPath indexPathForRow:0 inSection:0];
-            
-            [super scrollToRowAtIndexPath:indexP
-                         atScrollPosition:UITableViewScrollPositionTop
-                                 animated:animated];
-        }
-    }
+    [self setContentOffset:CGPointZero animated:animated];
 }
 
 - (void)scrollToBottomAnimated:(BOOL)animated {
