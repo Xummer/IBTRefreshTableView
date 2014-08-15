@@ -190,6 +190,14 @@
     
     if (_refreshControl.refreshing) {
         [_refreshControl endRefreshing];
+        
+        // Fix ContentInset became -60 when UIRefreshController endRefreshing
+        // http://stackoverflow.com/questions/20101572/ios7-uirefreshcontrol-changes-contentinset
+        if (self.contentInset.top < 0) {
+            UIEdgeInsets inset = self.contentInset;
+            inset.top = 0;
+            self.contentInset = inset;
+        }
     }
 }
 
